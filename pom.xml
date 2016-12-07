@@ -73,13 +73,6 @@
     </build>
     <repositories>
         <repository>
-            <id>private-central</id>
-            <url>http://nexus.ik.am:8081/repository/maven-central/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
             <id>private-releases</id>
             <url>http://nexus.ik.am:8081/repository/maven-releases/</url>
             <snapshots>
@@ -91,6 +84,13 @@
             <url>http://nexus.ik.am:8081/repository/maven-snapshots/</url>
             <snapshots>
                 <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>private-central</id>
+            <url>http://nexus.ik.am:8081/repository/maven-central/</url>
+            <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
