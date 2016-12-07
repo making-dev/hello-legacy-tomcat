@@ -103,4 +103,14 @@
             </snapshots>
         </pluginRepository>
     </pluginRepositories>
+    <distributionManagement>
+        <repository>
+            <id>private-snapshots</id>
+            <url>http://nexus.ik.am:8081/repository/maven-snapshots/</url>
+        </repository>
+        <snapshotRepository>
+            <id>private-releases</id>
+            <url>http://nexus.ik.am:8081/repository/maven-releases/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
