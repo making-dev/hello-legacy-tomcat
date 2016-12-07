@@ -15,7 +15,7 @@ public class EnvServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		PrintWriter pw = resp.getWriter();
-
+		System.out.println("<h1>Hello World</h1>");
 		System.getenv().entrySet()
 				.forEach(e -> pw.println(e.getKey() + ": " + e.getValue()));
 		pw.flush();
