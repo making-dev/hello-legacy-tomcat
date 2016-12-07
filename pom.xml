@@ -83,7 +83,7 @@
             <id>private-snapshots</id>
             <url>http://nexus.ik.am:8081/repository/maven-snapshots/</url>
             <snapshots>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
         <repository>
