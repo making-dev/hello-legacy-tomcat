@@ -3,7 +3,11 @@ resources:
 - name: legacy-tomcat-app
   type: git
   source:
-    uri: https://github.com/making/hello-legacy-tomcat-dev.git
+    uri: https://github.com/making-dev/hello-legacy-tomcat.git
+- name: legacy-tomcat-boshrelease
+  type: git
+  source:
+    uri: https://github.com/making/hello-legacy-tomcat-boshrelease.git
 - name: legacy-tomcat-cf
   type: cf
   source:
@@ -101,3 +105,129 @@ jobs:
     params:
       manifest: legacy-tomcat-app/manifest.yml
       path: output/app.war
+- name: upload-bosh-release-to-nexus
+  plan:
+  - aggregate:
+    - get: legacy-tomcat-app
+      trigger: true
+      passed:
+      - deploy-to-nexus
+    - get: legacy-tomcat-boshrelease
+      trigger: true
+  - task: mvn-download
+    config:
+      platform: linux
+      inputs:
+      - name: legacy-tomcat-app
+      outputs:
+      - name: dest
+      image_resource:
+        type: docker-image
+        source:
+          repository: nexus.ik.am:18443/maven
+          insecure_registries:
+          - nexus.ik.am:18443
+          username: {{nexus-username}}
+          password: {{nexus-password}}
+      run:
+        path: sh
+        args:
+        - -c
+        - |
+          cd legacy-tomcat-app
+          mvn -f pom-get.xml validate
+          mv app.war ../dest
+  - task: create-bosh-release
+    config:
+      platform: linux
+      inputs:
+      - name: legacy-tomcat-app
+      - name: legacy-tomcat-boshrelease
+      - name: dest
+      outputs:
+      - name: releases
+      image_resource:
+        type: docker-image
+        source:
+          repository: nexus.ik.am:18443/bosh/bosh-lite
+          tag: "9000.131.0"
+          insecure_registries:
+          - nexus.ik.am:18443
+          username: {{nexus-username}}
+          password: {{nexus-password}}
+      run:
+        path: sh
+        args:
+        - -c
+        - |
+          cd legacy-tomcat-boshrelease
+          mkdir src
+          rm -rf .final_builds
+          mv ../dest/app.war hello-legacy-tomcat-1.0.war
+          curl -L -J -O http://nexus.ik.am:8081/repository/bosh-blobs/openjdk-jdk/trusty/x86_64/openjdk-1.8.0_111.tar.gz
+          curl -L -J -O http://nexus.ik.am:8081/repository/bosh-blobs/tomcat/tomcat-8/v8.0.39/bin/apache-tomcat-8.0.39.tar.gz
+          bosh add blob hello-legacy-tomcat-1.0.war hello-legacy-tomcat
+          bosh add blob openjdk-1.8.0_111.tar.gz java
+          bosh add blob apache-tomcat-8.0.39.tar.gz tomcat
+          bosh -n upload blobs
+          bosh -n create release --name hello-legacy-tomcat --force --with-tarball --final
+          mv releases/hello-legacy-tomcat ../releases
+  - task: upload-bosh-release-to-nexus
+    config:
+      platform: linux
+      inputs:
+      - name: releases
+      image_resource:
+        type: docker-image
+        source:
+          repository: nexus.ik.am:18443/maven
+          insecure_registries:
+          - nexus.ik.am:18443
+          username: {{nexus-username}}
+          password: {{nexus-password}}
+      run:
+        path: sh
+        args:
+        - -c
+        - |
+          cd releases/hello-legacy-tomcat
+          curl -XPUT -u {{nexus-username}}:{{nexus-password}} --upload-file ./*.tgz http://nexus.ik.am:8081/repository/bosh-releases/hello-legacy-tomcat/
+- name: upload-bosh-release-to-director
+  plan:
+  - get: legacy-tomcat-boshrelease
+    trigger: true
+    passed:
+    - upload-bosh-release-to-nexus
+  - task: upload-bosh-release-to-nexus
+    config:
+      platform: linux
+      inputs:
+      - name: legacy-tomcat-boshrelease
+      image_resource:
+        type: docker-image
+        source:
+          repository: nexus.ik.am:18443/starkandwayne/concourse
+          insecure_registries:
+          - nexus.ik.am:18443
+          username: {{nexus-username}}
+          password: {{nexus-password}}
+      run:
+        path: sh
+        args:
+        - -c
+        - |
+          env
+          cat > ~/.bosh_config << EOF
+          ---
+          aliases:
+            target:
+              bosh-lite: {{bosh-target}}
+          auth:
+            {{bosh-target}}:
+              username: {{bosh-username}}
+              password: {{bosh-password}}
+          EOF
+
+          bosh target bosh-lite
+          bosh status
+          bosh upload release http://nexus.ik.am:8081/repository/bosh-releases/hello-legacy-tomcat/hello-legacy-tomcat-0.3.tgz
