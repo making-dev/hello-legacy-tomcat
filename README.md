@@ -160,7 +160,7 @@ resources:
 - name: legacy-tomcat-app
   type: git
   source:
-    uri: https://github.com/making/hello-legacy-tomcat-dev.git
+    uri: https://github.com/making-dev/hello-legacy-tomcat.git
 - name: legacy-tomcat-cf
   type: cf
   source:
