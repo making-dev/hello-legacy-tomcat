@@ -231,3 +231,43 @@ jobs:
           bosh target bosh-lite
           bosh status
           bosh upload release http://nexus.ik.am:8081/repository/bosh-releases/hello-legacy-tomcat/hello-legacy-tomcat-0.3.tgz
+- name: deploy-bosh-release
+  plan:
+  - get: legacy-tomcat-boshrelease
+    trigger: false
+    passed:
+    - upload-bosh-release-to-director
+  - task: upload-bosh-release-to-nexus
+    config:
+      platform: linux
+      inputs:
+      - name: legacy-tomcat-boshrelease
+      image_resource:
+        type: docker-image
+        source:
+          repository: nexus.ik.am:18443/starkandwayne/concourse
+          insecure_registries:
+          - nexus.ik.am:18443
+          username: {{nexus-username}}
+          password: {{nexus-password}}
+      run:
+        path: sh
+        args:
+        - -c
+        - |
+          env
+          cat > ~/.bosh_config << EOF
+          ---
+          aliases:
+            target:
+              bosh-lite: {{bosh-target}}
+          auth:
+            {{bosh-target}}:
+              username: {{bosh-username}}
+              password: {{bosh-password}}
+          EOF
+
+          bosh target bosh-lite
+          bosh deployment legacy-tomcat-boshrelease/manifest/hello-legacy-tomcat.yml
+          bosh status
+          bosh -n deploy
