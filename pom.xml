@@ -74,14 +74,14 @@
     <repositories>
         <repository>
             <id>private-snapshots</id>
-            <url>http://nexus.ik.am:8081/repository/maven-central/</url>
+            <url>https://nexus.ik.am/repository/maven-central/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
         </repository>
         <repository>
             <id>private-central</id>
-            <url>http://nexus.ik.am:8081/repository/maven-central/</url>
+            <url>https://nexus.ik.am/repository/maven-central/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -90,14 +90,14 @@
     <pluginRepositories>
         <pluginRepository>
             <id>private-plugin-snapshots</id>
-            <url>http://nexus.ik.am:8081/repository/maven-central/</url>
+            <url>https://nexus.ik.am/repository/maven-central/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
         </pluginRepository>
         <pluginRepository>
             <id>private-plugin-releases</id>
-            <url>http://nexus.ik.am:8081/repository/maven-central/</url>
+            <url>https://nexus.ik.am/repository/maven-central/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -106,11 +106,11 @@
     <distributionManagement>
         <repository>
             <id>private-releases</id>
-            <url>http://nexus.ik.am:8081/repository/maven-releases/</url>
+            <url>https://nexus.ik.am/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
             <id>private-snapshots</id>
-            <url>http://nexus.ik.am:8081/repository/maven-snapshots/</url>
+            <url>https://nexus.ik.am/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 </project>
